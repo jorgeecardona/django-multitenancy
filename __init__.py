@@ -1,4 +1,7 @@
 from multitenancy.models import MultiTenancyModel
+from unique_model.models import EntityNotFoundException
+
+from core.models.domain import Domain
 
 class MultiTenancyMiddleware(object):
     """

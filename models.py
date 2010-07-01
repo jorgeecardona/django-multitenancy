@@ -15,7 +15,7 @@ class MultiTenancyModel(models.Model):
     the model defined as tenant.
     """
 
-    tenant = models.CharField(max_length=36)
+    tenant = models.CharField(max_length=36, null=True)
 
     def get_tenant(self):
         return self.Meta.tenant_model.get_by_uuid(self.tenant)
