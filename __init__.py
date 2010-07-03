@@ -1,3 +1,5 @@
+import logging
+
 from multitenancy.models import MultiTenancyModel
 from unique_model.models import EntityNotFoundException
 
@@ -33,12 +35,12 @@ class MultiTenancyMiddleware(object):
         if hasattr(request, 'user') and isinstance(request.user, MultiTenancyModel):
             try:
                 request.domain = request.user.get_tenant()
-                return
             except EntityNotFoundException:
+                logging.info("Domain not found.")
                 pass
 
         # Check for subdomain
-        if len(request.get_host().split('.')) > 1:
+        elif len(request.get_host().split('.')) > 1:
 
             # Split host.
             subdomain, domain = host.split('.',1)
@@ -46,13 +48,24 @@ class MultiTenancyMiddleware(object):
             # Search domain with this name.
             try:
                 request.domain = Domain.get_by_name(subdomain)
-                return
             except EntityNotFoundException:
+                logging.info("Domain not found.")
                 pass
                 
-        if 'domain' in request.REQUEST:
+        elif 'domain' in request.REQUEST:
             try:
                 request.domain = Domain.get_by_uuid(request.REQUEST['domain'])
-                return
+                print request.domain
             except EntityNotFoundException:
+                logging.info("Domain not found.")
                 pass
+
+        else:
+            if hasattr(request, 'session'):
+                if isinstance(request.session.get('domain'), Domain):
+                    request.domain = request.session['domain']
+
+        if hasattr(request, 'session'):
+            request.session['domain'] = request.domain
+            
+
