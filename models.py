@@ -2,7 +2,6 @@ from django.db import models
 
 from unique_model.models import ReferenceUniqueModel
 # Create your models here.
-from core.models.domain import Domain
 
 class MultiTenancyModel(models.Model):
     """
@@ -16,11 +15,8 @@ class MultiTenancyModel(models.Model):
     the model defined as tenant.
     """
 
-    tenant = ReferenceUniqueModel(Domain, null=True)
-#    tenant = models.CharField(max_length=36, null=True)
-
-    def get_tenant(self):
-        return self._tenant_model.get_by_uuid(self.tenant)
+    _tenant_model = None
+    tenant = ReferenceUniqueModel(_tenant_model, null=True)
 
     class Meta:
         abstract = True
