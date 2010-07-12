@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 
 from unique_model.models import ReferenceUniqueModel
 # Create your models here.
@@ -15,8 +16,7 @@ class MultiTenancyModel(models.Model):
     the model defined as tenant.
     """
 
-    _tenant_model = None
-    tenant = ReferenceUniqueModel(_tenant_model, null=True)
+    tenant = ReferenceUniqueModel(settings.MULTITENANCY_MODEL, null=True)
 
     class Meta:
         abstract = True

@@ -40,17 +40,17 @@ class MultiTenancyMiddleware(object):
                 pass
 
         # Check for subdomain
-        elif len(request.get_host().split('.')) > 1:
+        # elif len(request.get_host().split('.')) > 1:
 
-            # Split host.
-            subdomain, domain = host.split('.',1)
+        #     # Split host.
+        #     subdomain, domain = request.get_host().split('.',1)
         
-            # Search domain with this name.
-            try:
-                request.domain = Domain.get_by_name(subdomain)
-            except EntityNotFoundException:
-                logging.info("Domain not found.")
-                pass
+        #     # Search domain with this name.
+        #     try:
+        #         request.domain = Domain.get_by_name(subdomain)
+        #     except EntityNotFoundException:
+        #         logging.info("Domain not found.")
+        #         pass
                 
         elif 'domain' in request.REQUEST:
             try:
