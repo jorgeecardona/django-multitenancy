@@ -1,9 +1,12 @@
 import logging
 
+from django.conf import settings
+
 from multitenancy.models import MultiTenancyModel
 from unique_model.models import EntityNotFoundException
 
-from core.models.domain import Domain
+__base, __sub = settings.MULTITENANCY_MODEL.rsplit('.',1)
+Tenant = getattr(__import__(__base, fromlist=[__sub]), __sub)
 
 class MultiTenancyMiddleware(object):
     """
@@ -29,43 +32,44 @@ class MultiTenancyMiddleware(object):
     def process_request(self, request):
 
         # Default value
-        request.domain = None 
+        request.tenant = None 
 
         # Check for user in session
-        if hasattr(request, 'user') and isinstance(request.user, MultiTenancyModel):
+        if hasattr(request, 'subject') and isinstance(request.subject, MultiTenancyModel):
             try:
-                request.domain = request.user.get_tenant()
+                request.tenant = request.subject.tenant
             except EntityNotFoundException:
-                logging.info("Domain not found.")
+                logging.info("Tenant not found.")
                 pass
 
         # Check for subdomain
-        # elif len(request.get_host().split('.')) > 1:
+        elif request.get_host().endswith('.ubidots.com'):
 
-        #     # Split host.
-        #     subdomain, domain = request.get_host().split('.',1)
-        
-        #     # Search domain with this name.
-        #     try:
-        #         request.domain = Domain.get_by_name(subdomain)
-        #     except EntityNotFoundException:
-        #         logging.info("Domain not found.")
-        #         pass
+            # Split host.
+            subdomain = '.'.join(request.get_host().rsplit('.',2)[:-2])
+
+            print subdomain
+            # Search domain with this name.
+            try:
+                request.tenant = Tenant._get_by(subdomain=subdomain)
+                print request.tenant
+            except EntityNotFoundException:
+                logging.info("Tenant not found.")
+                pass
                 
         elif 'domain' in request.REQUEST:
             try:
-                request.domain = Domain.get_by_uuid(request.REQUEST['domain'])
-                print request.domain
+                request.tenant = Domain.get_by_uuid(request.REQUEST['domain'])
             except EntityNotFoundException:
                 logging.info("Domain not found.")
                 pass
 
         else:
             if hasattr(request, 'session'):
-                if isinstance(request.session.get('domain'), Domain):
-                    request.domain = request.session['domain']
+                if isinstance(request.session.get('tenant'), Tenant):
+                    request.tenant = request.session['tenant']
 
         if hasattr(request, 'session'):
-            request.session['domain'] = request.domain
+            request.session['tenant'] = request.tenant
             
 
