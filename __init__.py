@@ -59,9 +59,9 @@ class MultiTenancyMiddleware(object):
                 
         elif 'domain' in request.REQUEST:
             try:
-                request.tenant = Domain.get_by_uuid(request.REQUEST['domain'])
+                request.tenant = Tenant.get_by_uuid(request.REQUEST['domain'])
             except EntityNotFoundException:
-                logging.info("Domain not found.")
+                logging.info("Tenant not found.")
                 pass
 
         else:
