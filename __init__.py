@@ -41,32 +41,11 @@ class MultiTenancyMiddleware(object):
             except EntityNotFoundException:
                 logging.info("Tenant not found.")
                 pass
-
-        # Check for subdomain
-        elif request.get_host().endswith('.ubidots.com'):
-
-            # Split host.
-            subdomain = '.'.join(request.get_host().rsplit('.',2)[:-2])
-
-            print subdomain
-            # Search domain with this name.
-            try:
-                request.tenant = Tenant._get_by(subdomain=subdomain)
-                print request.tenant
-            except EntityNotFoundException:
-                logging.info("Tenant not found.")
-                pass
-                
-        elif 'domain' in request.REQUEST:
-            try:
-                request.tenant = Tenant.get_by_uuid(request.REQUEST['domain'])
-            except EntityNotFoundException:
-                logging.info("Tenant not found.")
-                pass
-
+            
         else:
             if hasattr(request, 'session'):
                 if isinstance(request.session.get('tenant'), Tenant):
+                    print "Tenant:", request.session['tenant']
                     request.tenant = request.session['tenant']
 
         if hasattr(request, 'session'):
