@@ -3,10 +3,11 @@ import logging
 from django.conf import settings
 
 from multitenancy.models import MultiTenancyModel
-from unique_model.models import EntityNotFoundException
 
-__base, __sub = settings.MULTITENANCY_MODEL.rsplit('.',1)
-Tenant = getattr(__import__(__base, fromlist=[__sub]), __sub)
+MULTITENANCY_SUBJECT = getattr(
+    settings, 
+    'MULTITENANCY_SUBJECT', 
+    'subject')
 
 class MultiTenancyMiddleware(object):
     """
@@ -25,8 +26,6 @@ class MultiTenancyMiddleware(object):
 
     4) None Tenant
 
-
-
     """
 
     def process_request(self, request):
@@ -35,17 +34,17 @@ class MultiTenancyMiddleware(object):
         request.tenant = None 
 
         # Check for user in session
-        if hasattr(request, 'subject') and isinstance(request.subject, MultiTenancyModel):
-            try:
-                request.tenant = request.subject.tenant
-            except EntityNotFoundException:
-                logging.info("Tenant not found.")
-                pass
-            
+        if hasattr(request, MULTITENANCY_SUBJECT):
+            # Get the subject
+            subject = getattr(request, MULTITENANCY_SUBJECT)
+
+            # Check if it is a multitenancy model
+            if isinstance(subject, MultiTenancyModel):                
+                request.tenant = subject.tenant
+                
         else:
             if hasattr(request, 'session'):
-                if isinstance(request.session.get('tenant'), Tenant):
-                    print "Tenant:", request.session['tenant']
+                if 'tenant' in request.session:
                     request.tenant = request.session['tenant']
 
         if hasattr(request, 'session'):

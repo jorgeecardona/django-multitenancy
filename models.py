@@ -1,22 +1,18 @@
-from django.db import models
-from django.conf import settings
+from django import forms
+import mongoengine as mongo
 
-from unique_model.models import ReferenceUniqueModel
-# Create your models here.
-
-class MultiTenancyModel(models.Model):
+class MultiTenancyModel(mongo.Document):
     """
     Multi Tenancy Model
     ===================
 
-    This class defines an abstract class that let define others models in
-    a multitenancy environment.
+    This class defines an abstract class 
+    that let define others models in a 
+    multitenancy environment.
 
-    It only define a tenant field, as a char field with the uuid that uniquely identify
-    the model defined as tenant.
+    It only define a tenant field, as a 
+    char field with the reference field that 
+    uniquely identify the model defined as tenant.
     """
 
-    tenant = ReferenceUniqueModel(settings.MULTITENANCY_MODEL, null=True)
-
-    class Meta:
-        abstract = True
+    tenant = mongo.GenericReferenceField(default=None, required=True)
