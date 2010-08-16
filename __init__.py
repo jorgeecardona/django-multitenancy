@@ -45,7 +45,7 @@ class MultiTenancyMiddleware(object):
         else:
             if hasattr(request, 'session'):
                 if 'tenant' in request.session:
-                    request.tenant = request.session['tenant']
+                    request.tenant = request.sessioon['tenant']
 
         if hasattr(request, 'session'):
             request.session['tenant'] = request.tenant

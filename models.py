@@ -1,7 +1,7 @@
-from django import forms
-import mongoengine as mongo
+#from django import forms
+#import mongoengine as mongo
 
-class MultiTenancyModel(mongo.Document):
+class MultiTenancyModel(object):
     """
     Multi Tenancy Model
     ===================
@@ -15,4 +15,4 @@ class MultiTenancyModel(mongo.Document):
     uniquely identify the model defined as tenant.
     """
 
-    tenant = mongo.GenericReferenceField(default=None, required=True)
+#    tenant = mongo.GenericReferenceField()
